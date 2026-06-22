@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net10.0": {
       "coverlet.collector/6.0.4": {
@@ -392,6 +392,16 @@
         },
         "build": {
           "build/net8.0/xunit.runner.visualstudio.props": {}
+        }
+      },
+      "Wolverine/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/Wolverine.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Wolverine.dll": {}
         }
       }
     }
@@ -903,11 +913,17 @@
         "xunit.runner.visualstudio.3.1.4.nupkg.sha512",
         "xunit.runner.visualstudio.nuspec"
       ]
+    },
+    "Wolverine/1.0.0": {
+      "type": "project",
+      "path": "../Wolverine/Wolverine.csproj",
+      "msbuildProject": "../Wolverine/Wolverine.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
       "Microsoft.NET.Test.Sdk >= 17.14.1",
+      "Wolverine >= 1.0.0",
       "coverlet.collector >= 6.0.4",
       "xunit >= 2.9.3",
       "xunit.runner.visualstudio >= 3.1.4"
@@ -936,8 +952,13 @@
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "/Users/noravanvleet/RiderProjects/Wolverine/Wolverine/Wolverine.csproj": {
+              "projectPath": "/Users/noravanvleet/RiderProjects/Wolverine/Wolverine/Wolverine.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -954,6 +975,7 @@
     },
     "frameworks": {
       "net10.0": {
+        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "Microsoft.NET.Test.Sdk": {
