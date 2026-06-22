@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Spiderman.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2e7940a24dd87785de52c434bc833ca1de2397c9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d668277c48239b7e1133d05f2e1eff4698b4960d")]
 [assembly: System.Reflection.AssemblyProductAttribute("Spiderman.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Spiderman.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

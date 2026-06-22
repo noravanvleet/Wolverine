@@ -96,8 +96,8 @@
 /Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/bin/Debug/net10.0/Wolverine.pdb
 /Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/Spiderman.Tests.csproj.AssemblyReference.cache
 /Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/Spiderman.Tests.csproj.CoreCompileInputs.cache
+/Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/Spiderman.Tests.sourcelink.json
 /Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/Spiderman.Tests.dll
 /Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/refint/Spiderman.Tests.dll
 /Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/Spiderman.Tests.pdb
 /Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/ref/Spiderman.Tests.dll
-/Users/noravanvleet/RiderProjects/Wolverine/Spiderman.Tests/obj/Debug/net10.0/Spiderman.Tests.sourcelink.json
