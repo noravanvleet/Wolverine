@@ -12,3 +12,4 @@
 /Users/noravanvleet/RiderProjects/Wolverine/Wolverine/obj/Debug/net10.0/refint/Wolverine.dll
 /Users/noravanvleet/RiderProjects/Wolverine/Wolverine/obj/Debug/net10.0/Wolverine.pdb
 /Users/noravanvleet/RiderProjects/Wolverine/Wolverine/obj/Debug/net10.0/ref/Wolverine.dll
+/Users/noravanvleet/RiderProjects/Wolverine/Wolverine/obj/Debug/net10.0/Wolverine.sourcelink.json

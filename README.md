@@ -8,3 +8,8 @@ There is peril ahead....
 
 Good Luck,
 XOXO Deadpool
+
+
+PS
+In order to discover other mutants with stryker run this in your terminal:
+dotnet stryker
