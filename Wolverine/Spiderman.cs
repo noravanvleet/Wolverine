@@ -48,4 +48,11 @@ public class Spiderman
         ShootWeb();
         return $"{Name} swings through the city!";
     }
+
+    public void LexLuther_InterceptsWebUsingSuperGirlsDogYo()
+    {
+        Console.WriteLine("Bark");
+        WebFluidLevel -= 50;
+        Health = WebFluidLevel;
+    }
 }

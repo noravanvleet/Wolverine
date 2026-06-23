@@ -64,4 +64,12 @@ public class SpidermanTests
         spider.TakeDamage(999);
         Assert.Equal(0, spider.Health);
     }
+
+    [Fact]
+    public void LexLuther_InterceptsWebUsingSuperGirlsDogYo_DecreasesHealth()
+    {
+        var spider = new Spiderman(health: 80, webFluidLevel: 60);
+        spider.LexLuther_InterceptsWebUsingSuperGirlsDogYo();
+        Assert.Equal(10, spider.Health);
+    }
 }
