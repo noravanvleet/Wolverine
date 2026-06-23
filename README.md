@@ -13,3 +13,10 @@ XOXO Deadpool
 PS
 In order to discover other mutants with stryker run this in your terminal:
 dotnet stryker -o
+
+
+PPS
+If you want to be even more brutal and defeat Stryker install this into your other repos using:
+dotnet tool install -g dotnet-stryker
+
+You can also run mutation tests without the -o flag if you you want :)
