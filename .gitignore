@@ -1,4 +1,2 @@
-Spiderman.Tests/bin/*
-Spiderman.Tests/obj/*
-Wolverine/obj/*
-Wolverine/bin/*
+*obj/
+*bin/
