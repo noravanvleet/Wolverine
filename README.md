@@ -12,7 +12,7 @@ XOXO Deadpool
 
 PS
 In order to discover other mutants with stryker run this in your terminal:
-1. dotnet tool install dotnet-stryker
+1. dotnet tool install -g dotnet-stryker
 2. dotnet stryker -o
 
 
