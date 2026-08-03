@@ -17,5 +17,10 @@ In order to discover other mutants with PIT, run this in your terminal:
 
 
 PPS
-If you want to be even more brutal and defeat PIT's mutants, add the plugin
+If you want to be even more brutal and defeat more mutants, add the plugin
 (org.pitest:pitest-maven) to your other Maven projects' pom.xml.
+
+Oh One More thing:
+You can mutation test one class at a time if wanted.
+Run the following to mutation test the spiderman class:
+mvn org.pitest:pitest-maven:mutationCoverage -DtargetClasses=wolverine.Spiderman -DtargetTests=wolverine.SpidermanTests
