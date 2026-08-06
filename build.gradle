@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'jacoco'
     id 'info.solidsoft.pitest' version '1.19.0'
 }
 
@@ -26,6 +27,15 @@ application {
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 pitest {
@@ -34,3 +44,9 @@ pitest {
     targetTests = [project.findProperty('pitestTargetTests') ?: 'wolverine.*']
     mutationThreshold = 80
 }
+
+task crap4j(type: Exec) {
+    dependsOn test
+    commandLine 'java', '-jar', 'lib/crap4java-0.1.0-SNAPSHOT.jar'
+}
+
