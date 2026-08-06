@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gradle -v)",
+      "Bash(curl -s \"https://plugins.gradle.org/m2/info/solidsoft/pitest/info.solidsoft.pitest.gradle.plugin/maven-metadata.xml\")",
+      "Bash(gradle wrapper *)",
+      "Bash(java -version)",
+      "Bash(/usr/libexec/java_home -V)",
+      "Bash(./gradlew test *)"
+    ]
+  }
+}
