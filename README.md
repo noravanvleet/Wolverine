@@ -12,15 +12,15 @@ XOXO Deadpool
 
 PS
 In order to discover other mutants with PIT, run this in your terminal:
-1. mvn test-compile org.pitest:pitest-maven:mutationCoverage
-2. Open target/pit-reports/index.html in your browser
+1. ./gradlew pitest
+2. Open build/reports/pitest/index.html in your browser
 
 
 PPS
 If you want to be even more brutal and defeat more mutants, add the plugin
-(org.pitest:pitest-maven) to your other Maven projects' pom.xml.
+(info.solidsoft.pitest) to your other Gradle projects' build.gradle.
 
 Oh One More thing:
 You can mutation test one class at a time if wanted.
 Run the following to mutation test the spiderman class:
-mvn org.pitest:pitest-maven:mutationCoverage -DtargetClasses=wolverine.Spiderman -DtargetTests=wolverine.SpidermanTests
+./gradlew pitest -PpitestTargetClasses=wolverine.Spiderman -PpitestTargetTests=wolverine.SpidermanTests

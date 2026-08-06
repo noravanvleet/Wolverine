@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'info.solidsoft.pitest' version '1.19.0'
+}
+
+group = 'com.wolverine'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+}
+
+application {
+    mainClass = 'wolverine.Program'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+pitest {
+    junit5PluginVersion = '1.2.1'
+    targetClasses = [project.findProperty('pitestTargetClasses') ?: 'wolverine.*']
+    targetTests = [project.findProperty('pitestTargetTests') ?: 'wolverine.*']
+    mutationThreshold = 80
+}
