@@ -7,7 +7,7 @@ description: Reviews uncommitted code changes in the working tree for quality an
 
 Reviews the uncommitted changes in the current git working tree against a checklist of quality gates. Gather the change set first with `git status` (for untracked files) and `git diff HEAD` (for staged + unstaged modifications) before evaluating anything below.
 
-Feature toggle coverage is diff-scoped — it only evaluates changed hunks. Assertion density and CRAP score are whole-project baseline checks — run them every time, even if `git diff HEAD` is empty or the change set is unrelated to the flagged files; they're reporting on overall project health, not reviewing the diff itself. They're also independent of each other and of the diff-gathering step above, so kick off `assert-density.sh` and `./gradlew drop-a-duce` as parallel tool calls (same message, two Bash invocations) rather than waiting on one before starting the other — Gradle's JVM/daemon startup otherwise dominates the wall-clock cost of this skill.
+Feature toggle coverage is diff-scoped — it only evaluates changed hunks. Assertion density and CRAP score are whole-project baseline checks — run them every time, even if `git diff HEAD` is empty or the change set is unrelated to the flagged files; they're reporting on overall project health, not reviewing the diff itself. They're also independent of each other and of the diff-gathering step above, so kick off `assert-density.sh` and `./gradlew generate-crap-score` as parallel tool calls (same message, two Bash invocations) rather than waiting on one before starting the other — Gradle's JVM/daemon startup otherwise dominates the wall-clock cost of this skill.
 
 ## Checks
 
@@ -59,7 +59,7 @@ Goal: catch methods anywhere in the project that are both complex and underteste
 Run it quietly, discarding stdout/stderr and the exit code — the Gradle task log itself is pure noise here, and swallowing it keeps the whole check's context cost down to whatever the `jq` filter below returns:
 
 ```bash
-./gradlew drop-a-duce -q > /dev/null 2>&1 || true
+./gradlew generate-crap-score -q > /dev/null 2>&1 || true
 ```
 
 The task chain (`crap-java-check` → `renderCrapJavaReportHtml` → `openCrapJavaReport`) always writes `build/reports/crap-java/report.json`, even when the CRAP threshold check fails and the command exits non-zero — its `finalizedBy` wiring guarantees the report exists regardless of exit code. The chain includes an `openCrapJavaReport` task that shells out to `open` on the rendered HTML, but that exec runs from inside the Gradle JVM and isn't reliable for actually popping a window — don't depend on it. Explicitly `open build/reports/crap-java/report.html` yourself as part of the Output step below; this check gets its own report window, separate from the combined report.
@@ -74,7 +74,7 @@ For each object returned, report it as a finding: file:line (`src:lineStart`), m
 
 ## Output
 
-The CRAP score check produces its own report (`build/reports/crap-java/report.html`) as part of the `./gradlew drop-a-duce` task chain, but opening it is on you — see step 3. This section covers the other two checks, which get combined into a second, separate report.
+The CRAP score check produces its own report (`build/reports/crap-java/report.html`) as part of the `./gradlew generate-crap-score` task chain, but opening it is on you — see step 3. This section covers the other two checks, which get combined into a second, separate report.
 
 Run feature toggle coverage and assertion density before writing anything — don't post findings check-by-check as they finish. Once both have completed:
 

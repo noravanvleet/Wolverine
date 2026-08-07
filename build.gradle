@@ -131,7 +131,7 @@ tasks.named('crap-java-check') {
 
 renderCrapJavaReportHtml.finalizedBy openCrapJavaReport
 
-task('drop-a-duce') {
+task('generate-crap-score') {
     dependsOn 'crap-java-check'
 }
 
