@@ -6,7 +6,9 @@
       "Bash(gradle wrapper *)",
       "Bash(java -version)",
       "Bash(/usr/libexec/java_home -V)",
-      "Bash(./gradlew test *)"
+      "Bash(./gradlew test *)",
+      "WebSearch",
+      "Bash(python3 -m json.tool)"
     ]
   }
 }

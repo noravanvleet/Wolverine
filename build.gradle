@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'jacoco'
     id 'info.solidsoft.pitest' version '1.19.0'
+    id 'media.barney.crap-java' version '0.6.1'
 }
 
 group = 'com.wolverine'
@@ -45,8 +46,88 @@ pitest {
     mutationThreshold = 80
 }
 
-task crap4j(type: Exec) {
-    dependsOn test
-    commandLine 'java', '-jar', 'lib/crap4java-0.1.0-SNAPSHOT.jar'
+crapJava {
+    format.set('json')
+    output.set(layout.buildDirectory.file('reports/crap-java/report.json'))
 }
+
+task openCrapJavaReport(type: Exec) {
+    commandLine 'open', layout.buildDirectory.file('reports/crap-java/report.html').get().asFile.path
+}
+
+task renderCrapJavaReportHtml {
+    doLast {
+        def jsonFile = layout.buildDirectory.file('reports/crap-java/report.json').get().asFile
+        def report = new groovy.json.JsonSlurper().parse(jsonFile)
+        def methods = (report.methods as List).sort { -it.crap }
+        def failing = methods.count { it.status == 'failed' }
+        def worst = methods.first()
+
+        def escape = { s -> s.toString().replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;') }
+        def classNameOf = { src -> src.replaceFirst(/^src\/(main|test)\/java\//, '').replaceFirst(/\.java$/, '').replace('/', '.') }
+        def rows = methods.collect { m ->
+            def statusClass = m.status == 'failed' ? 'fail' : 'pass'
+            def statusLabel = m.status == 'failed' ? 'FAIL' : 'PASS'
+            """
+            <tr class="${statusClass}">
+                <td class="status">${statusLabel}</td>
+                <td class="mono">${escape(m.method)}</td>
+                <td class="mono">${escape(classNameOf(m.src))}</td>
+                <td class="mono">${escape(m.src)}:${m.lineStart}</td>
+                <td class="num">${m.cc}</td>
+                <td class="num">${String.format('%.1f%%', m.cov)}</td>
+                <td class="num crap">${String.format('%.1f', m.crap)}</td>
+            </tr>
+            """
+        }.join('')
+
+        def html = """
+        <!doctype html>
+        <html>
+        <head>
+        <meta charset="utf-8">
+        <title>CRAP Report</title>
+        <style>
+            body { font-family: -apple-system, sans-serif; margin: 2rem; color: #222; }
+            h1 { font-size: 1.4rem; }
+            .summary { background: #f4f4f4; border-radius: 6px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
+            .summary span { margin-right: 2rem; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { padding: 0.4rem 0.8rem; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background: #333; color: #fff; position: sticky; top: 0; }
+            .mono { font-family: ui-monospace, monospace; font-size: 0.9rem; }
+            .num, .status { text-align: right; }
+            .status { text-align: center; font-weight: bold; }
+            tr.fail { background: #fde2e2; }
+            tr.fail .status { color: #b00020; }
+            tr.pass { background: #eaf7ea; }
+            tr.pass .status { color: #1b7a1b; }
+            .crap { font-weight: bold; }
+        </style>
+        </head>
+        <body>
+        <h1>CRAP Report</h1>
+        <div class="summary">
+            <span><strong>Threshold:</strong> ${report.threshold}</span>
+            <span><strong>Methods:</strong> ${methods.size()}</span>
+            <span><strong>Failing:</strong> ${failing}</span>
+            <span><strong>Worst offender:</strong> ${escape(worst.method)} (${String.format('%.1f', worst.crap)})</span>
+        </div>
+        <table>
+            <tr><th>Status</th><th>Method</th><th>Class</th><th>Source:Line</th><th>CC</th><th>Cov%</th><th>CRAP</th></tr>
+            ${rows}
+        </table>
+        </body>
+        </html>
+        """
+
+        layout.buildDirectory.file('reports/crap-java/report.html').get().asFile.text = html
+    }
+}
+
+tasks.named('crap-java-check') {
+    finalizedBy renderCrapJavaReportHtml
+}
+
+renderCrapJavaReportHtml.finalizedBy openCrapJavaReport
 
