@@ -131,3 +131,7 @@ tasks.named('crap-java-check') {
 
 renderCrapJavaReportHtml.finalizedBy openCrapJavaReport
 
+task('drop-a-duce') {
+    dependsOn 'crap-java-check'
+}
+

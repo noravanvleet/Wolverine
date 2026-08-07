@@ -8,7 +8,8 @@
       "Bash(/usr/libexec/java_home -V)",
       "Bash(./gradlew test *)",
       "WebSearch",
-      "Bash(python3 -m json.tool)"
+      "Bash(python3 -m json.tool)",
+      "Bash(./gradlew drop-a-duce *)"
     ]
   }
 }
