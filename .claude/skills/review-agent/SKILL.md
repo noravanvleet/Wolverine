@@ -56,10 +56,10 @@ Goal: catch methods anywhere in the project that are both complex and underteste
 Run:
 
 ```bash
-./gradlew drop-a-duce
+./gradlew drop-a-duce -x openCrapJavaReport
 ```
 
-The task chain (`crap-java-check` → `renderCrapJavaReportHtml` → `openCrapJavaReport`) always writes `build/reports/crap-java/report.json`, even when the CRAP threshold check fails and the command exits non-zero — its `finalizedBy` wiring guarantees the report exists regardless of exit code.
+The task chain (`crap-java-check` → `renderCrapJavaReportHtml` → `openCrapJavaReport`) always writes `build/reports/crap-java/report.json`, even when the CRAP threshold check fails and the command exits non-zero — its `finalizedBy` wiring guarantees the report exists regardless of exit code. Exclude `openCrapJavaReport` with `-x` — it shells out to `open` on the rendered HTML, which would pop a browser window on the user's machine; this check only needs `report.json`, never the HTML.
 
 Once that command completes, filter the report with `jq` instead of reading the full file — `report.json` lists every method in the project, and only the failing ones matter here, so there's no reason to pull the passing majority into context on a large codebase:
 
@@ -71,22 +71,27 @@ For each object returned, report it as a finding: file:line (`src:lineStart`), m
 
 ## Output
 
-Run all three checks before writing anything — don't post findings check-by-check as they finish. Once feature toggle coverage, assertion density, and CRAP score have all completed, present one consolidated report in this shape:
+Run all three checks before writing anything — don't post findings check-by-check as they finish. Once feature toggle coverage, assertion density, and CRAP score have all completed:
 
-```
-## Review Report
+1. Post a brief markdown summary in chat (a few lines: counts per check, whether anything blocks the commit).
+2. Assemble the three results into a single JSON object matching this shape (any array may be empty):
 
-### Feature Toggle Coverage
-<one finding per ungated change: file:line, what's ungated, why — or "No issues found.">
+   ```json
+   {
+     "toggle": [ { "file": "path", "line": 12, "issue": "what's ungated", "why": "..." } ],
+     "assertionDensity": { "ratio": 0.032, "threshold": 0.05, "flagged": true,
+                            "sourceFiles": 10, "sourceLoc": 500, "testFiles": 4, "asserts": 16 },
+     "crap": [ { "src": "path", "lineStart": 10, "method": "Foo#bar", "crap": 34.2,
+                 "threshold": 30, "cc": 8, "cov": 12.5 } ]
+   }
+   ```
 
-### Assertion Density
-<ratio, FLAG or OK, and the TOTAL counts>
+   Write it to `build/reports/review-agent/data.json` (create the directory if it doesn't exist). `assertionDensity` fields come straight from `assert-density.sh`'s `TOTAL` line; `crap` entries come straight from the `jq` filter output above — no reshaping needed beyond field selection.
+3. Render and open the styled HTML report with the bundled script — don't hand-author the HTML:
 
-### CRAP Score
-<one line per failing method: file:line, method name, crap vs threshold, cc, cov — or "No methods over threshold.">
+   ```bash
+   node .claude/skills/review-agent/scripts/render-report.js build/reports/review-agent/data.json build/reports/review-agent/report.html
+   open build/reports/review-agent/report.html
+   ```
 
-### Summary
-<one line: how many findings total, and whether anything blocks the commit>
-```
-
-Keep each section's findings in the format already specified under that check above — this section only governs how the three results get assembled and presented, not what counts as a finding.
+Keep each section's findings in the format already specified under that check above — this step only governs how the three results get assembled and presented, not what counts as a finding.

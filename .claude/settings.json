@@ -14,7 +14,12 @@
       "Read(//Users/noravanvleet/.claude/**)",
       "Edit(/.claude/skills/review-agent/**)",
       "Bash(git -C /Users/noravanvleet/whiley/katas/Wolverine diff .claude/skills/review-agent/SKILL.md)",
-      "Bash(git -C /Users/noravanvleet/whiley/katas/Wolverine diff --staged -- .claude/skills/review-agent/SKILL.md)"
+      "Bash(git -C /Users/noravanvleet/whiley/katas/Wolverine diff --staged -- .claude/skills/review-agent/SKILL.md)",
+      "Bash(chmod +x /Users/noravanvleet/whiley/katas/Wolverine/.claude/skills/review-agent/scripts/render-report.js)",
+      "Bash(echo '{\"toggle\":[],\"assertionDensity\":{\"ratio\":0.08,\"threshold\":0.05,\"flagged\":false,\"sourceFiles\":10,\"sourceLoc\":500,\"testFiles\":4,\"asserts\":40},\"crap\":[]}')",
+      "Bash(node .claude/skills/review-agent/scripts/render-report.js /tmp/rr-test/clean.json /tmp/rr-test/clean.html)",
+      "Read(//tmp/rr-test/**)",
+      "Bash(rm -rf /tmp/rr-test)"
     ]
   }
 }
