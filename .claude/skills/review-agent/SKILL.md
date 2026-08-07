@@ -46,3 +46,17 @@ The ratio is project-wide: total assertions across every test file divided by to
 Interpreting output:
 - A `FLAG` line means the project's total-asserts/total-source-LOC ratio is below the threshold — treat this as a prompt to look closer at the diff's test coverage, not an automatic failure (a small, well-targeted assertion count can still be adequate for straightforward code).
 - The `TOTAL` line reports the raw counts (`source_files`, `source_loc`, `test_files`, `asserts`) and the resulting `ratio` — use it to sanity-check the threshold and to see whether the current change moved the needle, not as a pass/fail gate on its own.
+
+### CRAP score (Java)
+
+Goal: catch methods in the changed files that are both complex and undertested — the combination that's expensive to maintain and easy to break.
+
+Run:
+
+```bash
+./gradlew drop-a-duce
+```
+
+The task chain (`crap-java-check` → `renderCrapJavaReportHtml` → `openCrapJavaReport`) always writes `build/reports/crap-java/report.json`, even when the CRAP threshold check fails and the command exits non-zero — its `finalizedBy` wiring guarantees the report exists regardless of exit code.
+
+Cross-reference `report.json`'s `methods` list against the files touched in the diff (match on the `src` field). For each method in a changed file with `"status": "failed"`, report it as a finding: file:line (`src:lineStart`), method name, `crap` score vs `threshold`, complexity (`cc`), and coverage (`cov`). Ignore failing methods in files the diff didn't touch — that's pre-existing debt, not something this change set introduced.

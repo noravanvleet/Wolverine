@@ -9,7 +9,10 @@
       "Bash(./gradlew test *)",
       "WebSearch",
       "Bash(python3 -m json.tool)",
-      "Bash(./gradlew drop-a-duce *)"
+      "Bash(./gradlew drop-a-duce *)",
+      "Bash(find . -path ./node_modules -prune -o -iname \"*review-agent*\" -print 2>/dev/null; find ~/.claude -iname \"*review-agent*\" 2>/dev/null)",
+      "Read(//Users/noravanvleet/.claude/**)",
+      "Edit(/.claude/skills/review-agent/**)"
     ]
   }
 }
