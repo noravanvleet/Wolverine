@@ -41,12 +41,12 @@ Run the bundled script instead of reading files directly — it does the countin
 .claude/skills/review-agent/scripts/assert-density.sh
 ```
 
-With no arguments it scans the whole project (repo root, resolved via `git rev-parse --show-toplevel`). Pass a root path to scope both counts to a subtree instead, e.g. `assert-density.sh billing-service`. Override the flag threshold (default `0.05` asserts-per-source-LOC) with `THRESHOLD=0.1 assert-density.sh`.
+With no arguments it scans the whole project (repo root, resolved via `git rev-parse --show-toplevel`). Pass a root path to scope both counts to a subtree instead, e.g. `assert-density.sh billing-service`. Override the flag threshold (default `0.1` asserts-per-source-LOC) with `THRESHOLD=0.15 assert-density.sh`.
 
 The ratio is project-wide: total assertions across every test file divided by total lines of code across every production source file — not a per-file ratio, so an individual thin test doesn't get singled out; it's a signal about overall suite health.
 
 Interpreting output:
-- A `FLAG` line means the project's total-asserts/total-source-LOC ratio is below the threshold — treat this as a prompt to look closer at overall test coverage, not an automatic failure (a small, well-targeted assertion count can still be adequate for straightforward code).
+- A `boo tomato tomato` line means the project's total-asserts/total-source-LOC ratio is below the threshold — treat this as a prompt to look closer at overall test coverage, not an automatic failure (a small, well-targeted assertion count can still be adequate for straightforward code).
 - The `TOTAL` line reports the raw counts (`source_files`, `source_loc`, `test_files`, `asserts`) and the resulting `ratio` — use it to sanity-check the threshold, not as a pass/fail gate on its own.
 
 ### CRAP score (Java)
@@ -56,10 +56,10 @@ Goal: catch methods anywhere in the project that are both complex and underteste
 Run:
 
 ```bash
-./gradlew drop-a-duce -x openCrapJavaReport
+./gradlew drop-a-duce
 ```
 
-The task chain (`crap-java-check` → `renderCrapJavaReportHtml` → `openCrapJavaReport`) always writes `build/reports/crap-java/report.json`, even when the CRAP threshold check fails and the command exits non-zero — its `finalizedBy` wiring guarantees the report exists regardless of exit code. Exclude `openCrapJavaReport` with `-x` — it shells out to `open` on the rendered HTML, which would pop a browser window on the user's machine; this check only needs `report.json`, never the HTML.
+The task chain (`crap-java-check` → `renderCrapJavaReportHtml` → `openCrapJavaReport`) always writes `build/reports/crap-java/report.json`, even when the CRAP threshold check fails and the command exits non-zero — its `finalizedBy` wiring guarantees the report exists regardless of exit code. The chain includes an `openCrapJavaReport` task that shells out to `open` on the rendered HTML, but that exec runs from inside the Gradle JVM and isn't reliable for actually popping a window — don't depend on it. Explicitly `open build/reports/crap-java/report.html` yourself as part of the Output step below; this check gets its own report window, separate from the combined report.
 
 Once that command completes, filter the report with `jq` instead of reading the full file — `report.json` lists every method in the project, and only the failing ones matter here, so there's no reason to pull the passing majority into context on a large codebase:
 
@@ -71,27 +71,28 @@ For each object returned, report it as a finding: file:line (`src:lineStart`), m
 
 ## Output
 
-Run all three checks before writing anything — don't post findings check-by-check as they finish. Once feature toggle coverage, assertion density, and CRAP score have all completed:
+The CRAP score check produces its own report (`build/reports/crap-java/report.html`) as part of the `./gradlew drop-a-duce` task chain, but opening it is on you — see step 3. This section covers the other two checks, which get combined into a second, separate report.
 
-1. Post a brief markdown summary in chat (a few lines: counts per check, whether anything blocks the commit).
-2. Assemble the three results into a single JSON object matching this shape (any array may be empty):
+Run feature toggle coverage and assertion density before writing anything — don't post findings check-by-check as they finish. Once both have completed:
+
+1. Post a brief markdown summary in chat (a few lines: counts per check, whether anything blocks the commit — CRAP findings included).
+2. Assemble the two results into a single JSON object matching this shape (either field's array/flag may be empty/false):
 
    ```json
    {
      "toggle": [ { "file": "path", "line": 12, "issue": "what's ungated", "why": "..." } ],
-     "assertionDensity": { "ratio": 0.032, "threshold": 0.05, "flagged": true,
-                            "sourceFiles": 10, "sourceLoc": 500, "testFiles": 4, "asserts": 16 },
-     "crap": [ { "src": "path", "lineStart": 10, "method": "Foo#bar", "crap": 34.2,
-                 "threshold": 30, "cc": 8, "cov": 12.5 } ]
+     "assertionDensity": { "ratio": 0.032, "threshold": 0.1, "flagged": true,
+                            "sourceFiles": 10, "sourceLoc": 500, "testFiles": 4, "asserts": 16 }
    }
    ```
 
-   Write it to `build/reports/review-agent/data.json` (create the directory if it doesn't exist). `assertionDensity` fields come straight from `assert-density.sh`'s `TOTAL` line; `crap` entries come straight from the `jq` filter output above — no reshaping needed beyond field selection.
-3. Render and open the styled HTML report with the bundled script — don't hand-author the HTML:
+   Write it to `build/reports/review-agent/data.json` (create the directory if it doesn't exist). `assertionDensity` fields come straight from `assert-density.sh`'s `TOTAL` line — no reshaping needed beyond field selection.
+3. Render both reports and explicitly open both of them yourself — don't rely on `openCrapJavaReport`'s own `open` call, it doesn't reliably surface a window:
 
    ```bash
    node .claude/skills/review-agent/scripts/render-report.js build/reports/review-agent/data.json build/reports/review-agent/report.html
+   open build/reports/crap-java/report.html
    open build/reports/review-agent/report.html
    ```
 
-Keep each section's findings in the format already specified under that check above — this step only governs how the three results get assembled and presented, not what counts as a finding.
+Every run of this skill must end with both report windows open — the CRAP report and the toggle/assertion-density report. Keep each section's findings in the format already specified under that check above — this step only governs how results get assembled and presented, not what counts as a finding.

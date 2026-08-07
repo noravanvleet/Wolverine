@@ -4,10 +4,10 @@
 #   assert-density.sh            # scan the whole project (repo root, or $(pwd) if not a git repo)
 #   assert-density.sh <root>     # scope both counts to files under <root>
 # Env:
-#   THRESHOLD=0.05   # asserts-per-source-LOC ratio below which the project is flagged
+#   THRESHOLD=0.1    # asserts-per-source-LOC ratio below which the project is flagged
 set -euo pipefail
 
-THRESHOLD="${THRESHOLD:-0.05}"
+THRESHOLD="${THRESHOLD:-0.1}"
 ASSERT_PATTERN='\b(assert[A-Z][A-Za-z0-9]*|assertThat|verify)\s*\('
 TEST_NAME_PATTERN='(Test|Tests|IT)\.java$'
 TEST_PATH_PATTERN='/test/'
@@ -61,7 +61,7 @@ ratio=$(awk -v a="$test_asserts" -v l="$source_loc" 'BEGIN{ if (l>0) printf "%.3
 below=$(awk -v r="$ratio" -v t="$THRESHOLD" 'BEGIN{ print (r+0 < t+0) ? 1 : 0 }')
 
 if [ "$below" -eq 1 ]; then
-  echo "FLAG  project assertion density below threshold"
+  echo "boo tomato tomato  project assertion density below threshold"
 fi
 
 printf 'TOTAL source_files=%d source_loc=%d test_files=%d asserts=%d ratio=%s threshold=%s\n' \

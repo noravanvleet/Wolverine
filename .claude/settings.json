@@ -19,7 +19,19 @@
       "Bash(echo '{\"toggle\":[],\"assertionDensity\":{\"ratio\":0.08,\"threshold\":0.05,\"flagged\":false,\"sourceFiles\":10,\"sourceLoc\":500,\"testFiles\":4,\"asserts\":40},\"crap\":[]}')",
       "Bash(node .claude/skills/review-agent/scripts/render-report.js /tmp/rr-test/clean.json /tmp/rr-test/clean.html)",
       "Read(//tmp/rr-test/**)",
-      "Bash(rm -rf /tmp/rr-test)"
+      "Bash(rm -rf /tmp/rr-test)",
+      "Bash(mkdir -p /tmp/rr-test2)",
+      "Bash(node .claude/skills/review-agent/scripts/render-report.js /tmp/rr-test2/data.json /tmp/rr-test2/report.html)",
+      "Read(//tmp/rr-test2/**)",
+      "Bash(node .claude/skills/review-agent/scripts/render-report.js build/reports/review-agent/data.json /tmp/rr-check.html)",
+      "Bash(node .claude/skills/review-agent/scripts/render-report.js build/reports/review-agent/data.json /tmp/rr-preview.html)",
+      "Bash(open -a \"Google Chrome\" --args --headless=new --disable-gpu --screenshot=/tmp/rr-preview.png --window-size=1000,800 \"file:///tmp/rr-preview.html\")",
+      "Bash([ -x \"$CHROME\" ])",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --disable-gpu --screenshot=/tmp/rr-preview.png --window-size=1000,900 file:///tmp/rr-preview.html)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --disable-gpu --screenshot=/tmp/crap-preview.png --window-size=1000,900 file:///Users/noravanvleet/whiley/katas/Wolverine/build/reports/crap-java/report.html)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }
