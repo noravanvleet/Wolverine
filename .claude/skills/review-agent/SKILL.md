@@ -7,6 +7,8 @@ description: Reviews uncommitted code changes in the working tree for quality an
 
 Reviews the uncommitted changes in the current git working tree against a checklist of quality gates. Gather the change set first with `git status` (for untracked files) and `git diff HEAD` (for staged + unstaged modifications) before evaluating anything below.
 
+Feature toggle coverage is diff-scoped — it only evaluates changed hunks. Assertion density and CRAP score are whole-project baseline checks — run them every time, even if `git diff HEAD` is empty or the change set is unrelated to the flagged files; they're reporting on overall project health, not reviewing the diff itself. They're also independent of each other and of the diff-gathering step above, so kick off `assert-density.sh` and `./gradlew drop-a-duce` as parallel tool calls (same message, two Bash invocations) rather than waiting on one before starting the other — Gradle's JVM/daemon startup otherwise dominates the wall-clock cost of this skill.
+
 ## Checks
 
 ### Feature toggle coverage
@@ -44,12 +46,12 @@ With no arguments it scans the whole project (repo root, resolved via `git rev-p
 The ratio is project-wide: total assertions across every test file divided by total lines of code across every production source file — not a per-file ratio, so an individual thin test doesn't get singled out; it's a signal about overall suite health.
 
 Interpreting output:
-- A `FLAG` line means the project's total-asserts/total-source-LOC ratio is below the threshold — treat this as a prompt to look closer at the diff's test coverage, not an automatic failure (a small, well-targeted assertion count can still be adequate for straightforward code).
-- The `TOTAL` line reports the raw counts (`source_files`, `source_loc`, `test_files`, `asserts`) and the resulting `ratio` — use it to sanity-check the threshold and to see whether the current change moved the needle, not as a pass/fail gate on its own.
+- A `FLAG` line means the project's total-asserts/total-source-LOC ratio is below the threshold — treat this as a prompt to look closer at overall test coverage, not an automatic failure (a small, well-targeted assertion count can still be adequate for straightforward code).
+- The `TOTAL` line reports the raw counts (`source_files`, `source_loc`, `test_files`, `asserts`) and the resulting `ratio` — use it to sanity-check the threshold, not as a pass/fail gate on its own.
 
 ### CRAP score (Java)
 
-Goal: catch methods in the changed files that are both complex and undertested — the combination that's expensive to maintain and easy to break.
+Goal: catch methods anywhere in the project that are both complex and undertested — the combination that's expensive to maintain and easy to break.
 
 Run:
 
@@ -59,4 +61,32 @@ Run:
 
 The task chain (`crap-java-check` → `renderCrapJavaReportHtml` → `openCrapJavaReport`) always writes `build/reports/crap-java/report.json`, even when the CRAP threshold check fails and the command exits non-zero — its `finalizedBy` wiring guarantees the report exists regardless of exit code.
 
-Cross-reference `report.json`'s `methods` list against the files touched in the diff (match on the `src` field). For each method in a changed file with `"status": "failed"`, report it as a finding: file:line (`src:lineStart`), method name, `crap` score vs `threshold`, complexity (`cc`), and coverage (`cov`). Ignore failing methods in files the diff didn't touch — that's pre-existing debt, not something this change set introduced.
+Once that command completes, filter the report with `jq` instead of reading the full file — `report.json` lists every method in the project, and only the failing ones matter here, so there's no reason to pull the passing majority into context on a large codebase:
+
+```bash
+jq '.methods[] | select(.status=="failed")' build/reports/crap-java/report.json
+```
+
+For each object returned, report it as a finding: file:line (`src:lineStart`), method name, `crap` score vs `threshold`, complexity (`cc`), and coverage (`cov`). This is a project-wide baseline check — report all failing methods, not just ones in files the current diff touched.
+
+## Output
+
+Run all three checks before writing anything — don't post findings check-by-check as they finish. Once feature toggle coverage, assertion density, and CRAP score have all completed, present one consolidated report in this shape:
+
+```
+## Review Report
+
+### Feature Toggle Coverage
+<one finding per ungated change: file:line, what's ungated, why — or "No issues found.">
+
+### Assertion Density
+<ratio, FLAG or OK, and the TOTAL counts>
+
+### CRAP Score
+<one line per failing method: file:line, method name, crap vs threshold, cc, cov — or "No methods over threshold.">
+
+### Summary
+<one line: how many findings total, and whether anything blocks the commit>
+```
+
+Keep each section's findings in the format already specified under that check above — this section only governs how the three results get assembled and presented, not what counts as a finding.

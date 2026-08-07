@@ -67,5 +67,6 @@ public class Spiderman {
         System.out.println("Bark");
         webFluidLevel -= 50;
         health = webFluidLevel;
+        System.out.println("Lex Luther intercepts Spiderman's web using Supergirl's dog Yo!");
     }
 }
