@@ -1,6 +1,6 @@
 ---
 name: review-agent
-description: Reviews uncommitted code changes in the working tree for quality and safety issues before commit. Currently checks that new or behavior-changing code is properly gated behind a feature toggle/flag, so that turning the toggle off leaves end users unaffected. Use when the user asks to review uncommitted or staged changes, or invokes /review-agent.
+description: Reviews uncommitted code changes in the working tree for quality and safety issues before commit. Currently checks that new, changed, or removed behavior is properly gated behind a feature toggle/flag, so that turning the toggle off leaves end users unaffected. Use when the user asks to review uncommitted or staged changes, or invokes /review-agent.
 ---
 
 # Review Agent
@@ -13,21 +13,24 @@ Feature toggle coverage is diff-scoped — it only evaluates changed hunks. Asse
 
 ### Feature toggle coverage
 
-Goal: any new or behavior-changing code in the diff must be wrapped in a feature toggle such that turning the toggle off leaves the end user experience identical to before the change.
+Goal: any new, changed, or removed behavior in the diff must be wrapped in a feature toggle such that turning the toggle off leaves the end user experience identical to before the change. This applies symmetrically to additions and deletions — deleting a line of behavior unconditionally is just as unguarded as adding one unconditionally, since there's no toggle to flip if the removal needs to be undone without a revert/redeploy.
 
 For each changed file/hunk:
 
 1. Classify the change as one of:
-   - **User-facing / behavioral** — changes what a user sees or how the system responds (new feature, altered logic, new API field/response, changed default, etc.)
-   - **Non-behavioral** — refactor with no observable behavior change, tests, docs, comments, formatting, internal tooling/config with no runtime effect.
+   - **User-facing / behavioral** — changes what a user sees or how the system responds. Covers both additions (new feature, altered logic, new API field/response, changed default) and removals (deleted logging/output the user could observe, a deleted branch, a removed check, a dropped API field) — a deletion is a behavior change whenever the *before* and *after* states differ in something observable.
+   - **Non-behavioral** — refactor with no observable behavior change, tests, docs, comments, formatting, internal tooling/config with no runtime effect, or removal of genuinely dead/unreachable code.
    - Non-behavioral changes are exempt from this check.
-2. For behavioral changes, confirm the new/changed code path is conditioned on a toggle check (e.g., `if (flags.isEnabled(...))`, a config/env-var gate, LaunchDarkly/Statsig/Unleash-style call, etc.), and that the "toggle off" branch reproduces the prior behavior exactly — not just skips the new code with a different fallback.
+2. For behavioral changes:
+   - Additions: confirm the new/changed code path is conditioned on a toggle check (e.g., `if (flags.isEnabled(...))`, a config/env-var gate, LaunchDarkly/Statsig/Unleash-style call, etc.), and that the "toggle off" branch reproduces the prior behavior exactly — not just skips the new code with a different fallback.
+   - Removals: confirm the old behavior is still reachable on a "toggle off" branch (e.g., `if (flags.isEnabled(...)) { /* new path without the removed code */ } else { /* old path, unchanged */ }`) rather than deleted outright with nothing to flip back to.
 3. Flag as a finding any of:
    - New or changed user-facing logic with no toggle check at all.
+   - Behavior-changing code removed outright with no toggle preserving the old path — the deletion applies unconditionally, so disabling any toggle would not bring the old behavior back.
    - A toggle exists, but the "off" path doesn't actually restore prior behavior (e.g., a shared helper was changed unconditionally and only the call site is gated).
    - The toggle defaults to enabled, so the change ships immediately regardless of who has the flag off.
    - Partial coverage — the same behavior change also lands on a code path that isn't gated by the toggle.
-4. For each finding, report the file:line, what's ungated, and why disabling the toggle would not currently protect users from the change.
+4. For each finding, report the file:line, what's ungated (added or removed), and why disabling the toggle would not currently protect users from the change.
 
 ### Assertion density (Java)
 

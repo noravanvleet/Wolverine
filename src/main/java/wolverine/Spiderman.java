@@ -24,7 +24,6 @@ public class Spiderman {
     }
 
     public String getName() {
-        System.out.println("Spiderman's name is: " + name);
         return name;
     }
 
